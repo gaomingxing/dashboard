@@ -12,6 +12,8 @@ const config = {
       bodySizeLimit: '5mb',
     },
     authInterrupts: true,
+    // 关闭 PPR，以便在非 Vercel 环境（如 Docker/自托管）部署
+    ppr: false,
   },
   turbopack: {
     resolveAlias: {

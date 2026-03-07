@@ -9,9 +9,14 @@ RUN apk add --no-cache bash
 RUN npm install -g bun@1.2.0
 
 COPY package.json bun.lockb* ./
+# Skip Puppeteer/Chromium download (e2b SDK doesn't need local browser in container)
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 RUN bun install --frozen-lockfile
 
 COPY . .
+
+ENV PORT=3003
+EXPOSE 3003
 
 # 使用启动脚本作为入口点
 # RUN bun run build

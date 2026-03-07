@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "<<<<<<< Next.js": "",
-    "dev": "bun scripts:check-app-env && next dev",
+    "dev": "bun scripts:check-app-env && next dev --port 3003",
     "build": "next build",
     "start": "next start",
     "start:prod": "next start -p 3003",
