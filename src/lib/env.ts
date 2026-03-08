@@ -61,6 +61,9 @@ export const clientSchema = z.object({
 
   NEXT_PUBLIC_INFRA_API_URL: z.url().optional(),
   NEXT_PUBLIC_DASHBOARD_API_URL: z.url().optional(),
+
+  /** Public URL when behind ALB/K8s (e.g. VKE); used for redirect origin when X-Forwarded-Host is not set */
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
 })
 
 export const testEnvSchema = z.object({

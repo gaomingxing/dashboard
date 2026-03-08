@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { AUTH_URLS, PROTECTED_URLS } from '@/configs/urls'
 import { createClient } from '@/lib/clients/supabase/server'
-import { encodedRedirect } from '@/lib/utils/auth'
+import { encodedRedirect, getRequestOrigin } from '@/lib/utils/auth'
 import { setTeamCookies } from '@/lib/utils/cookies'
 import { resolveUserTeam } from '@/server/team/resolve-user-team'
 
@@ -53,11 +53,12 @@ export async function GET(request: NextRequest) {
   // Set team cookies for persistence
   await setTeamCookies(team.id, team.slug)
 
-  // Determine redirect path based on tab parameter
+  // Determine redirect path based on tab parameter (use client-facing origin when behind proxy)
   const urlGenerator = tab ? TAB_URL_MAP[tab] : null
   const redirectPath = urlGenerator
     ? urlGenerator(team.slug || team.id)
     : PROTECTED_URLS.SANDBOXES(team.slug || team.id)
+  const origin = getRequestOrigin(request)
 
-  return NextResponse.redirect(new URL(redirectPath, request.url))
+  return NextResponse.redirect(new URL(redirectPath, origin))
 }

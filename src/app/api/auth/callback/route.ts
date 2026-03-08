@@ -3,7 +3,7 @@ import { serializeError } from 'serialize-error'
 import { AUTH_URLS, PROTECTED_URLS } from '@/configs/urls'
 import { l } from '@/lib/clients/logger/logger'
 import { createClient } from '@/lib/clients/supabase/server'
-import { encodedRedirect } from '@/lib/utils/auth'
+import { encodedRedirect, getRequestOrigin } from '@/lib/utils/auth'
 
 export async function GET(request: Request) {
   // The `/auth/callback` route is required for the server-side auth flow implemented
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const origin = requestUrl.origin
+  const origin = getRequestOrigin(request)
   const returnTo = requestUrl.searchParams.get('returnTo')?.toString()
   const redirectTo = requestUrl.searchParams.get('redirect_to')?.toString()
 
@@ -100,7 +100,7 @@ export async function GET(request: Request) {
     }
   }
 
-  // Default redirect to dashboard
+  // Default redirect to dashboard (use full URL so redirect stays on same host behind proxy)
   l.info(
     {
       key: 'auth_callback:redirecting_to_dashboard',
@@ -110,5 +110,5 @@ export async function GET(request: Request) {
     },
     `Redirecting to dashboard`
   )
-  return redirect(PROTECTED_URLS.DASHBOARD)
+  return redirect(`${origin}${PROTECTED_URLS.DASHBOARD}`)
 }

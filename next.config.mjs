@@ -5,6 +5,10 @@ export const DOCUMENTATION_DOMAIN = 'e2b.mintlify.app'
 const config = {
   reactStrictMode: true,
   reactCompiler: true,
+  // 通过公网 IP 访问 dev 时允许跨域（与 NEXT_PUBLIC_APP_URL 一致）
+  ...(process.env.NEXT_PUBLIC_APP_URL && {
+    allowedDevOrigins: [new URL(process.env.NEXT_PUBLIC_APP_URL).origin],
+  }),
   experimental: {
     useCache: true,
     turbopackFileSystemCacheForDev: true,

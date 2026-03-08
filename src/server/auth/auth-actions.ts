@@ -59,6 +59,21 @@ async function checkAuthProviderHealth(): Promise<boolean> {
 const AUTH_PROVIDER_ERROR_MESSAGE =
   'Our authentication provider is experiencing issues. Please try again later.'
 
+/** Prefer NEXT_PUBLIC_APP_URL when set (e.g. public IP access) so redirects don't use localhost. */
+function getRedirectOrigin(headerStore: Headers): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (appUrl) {
+    try {
+      return new URL(appUrl).origin
+    } catch {
+      // invalid URL, fall through
+    }
+  }
+  const origin = headerStore.get('origin')
+  if (!origin) throw new Error('Origin not found')
+  return origin
+}
+
 const SignInWithOAuthInputSchema = z.object({
   provider: z.union([z.literal('github'), z.literal('google')]),
   returnTo: relativeUrlSchema.optional(),
@@ -84,12 +99,7 @@ export const signInWithOAuthAction = actionClient
     const supabase = await createClient()
 
     const headerStore = await headers()
-
-    const origin = headerStore.get('origin')
-
-    if (!origin) {
-      throw new Error('Origin not found')
-    }
+    const origin = getRedirectOrigin(headerStore)
 
     l.info(
       {
@@ -157,12 +167,7 @@ export const signUpAction = actionClient
 
       const supabase = await createClient()
       const headerStore = await headers()
-
-      const origin = headerStore.get('origin')
-
-      if (!origin) {
-        throw new Error('Origin not found')
-      }
+      const origin = getRedirectOrigin(headerStore)
 
       // basic security check, that password does not equal e-mail
       if (password && email && password.toLowerCase() === email.toLowerCase()) {
@@ -231,12 +236,7 @@ export const signInAction = actionClient
     const supabase = await createClient()
 
     const headerStore = await headers()
-
-    const origin = headerStore.get('origin')
-
-    if (!origin) {
-      throw new Error('Origin not found')
-    }
+    const origin = getRedirectOrigin(headerStore)
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -265,7 +265,9 @@ export const signInAction = actionClient
       throw redirect(url.toString())
     }
 
-    throw redirect(returnTo || PROTECTED_URLS.DASHBOARD)
+    // Use full URL so redirect stays on the same host when behind proxy (e.g. Docker)
+    const redirectPath = returnTo || PROTECTED_URLS.DASHBOARD
+    throw redirect(`${origin}${redirectPath}`)
   })
 
 export const forgotPasswordAction = actionClient
@@ -306,11 +308,11 @@ export const forgotPasswordAction = actionClient
 
 export async function signOutAction(returnTo?: string) {
   const supabase = await createClient()
-
   await supabase.auth.signOut()
 
+  const headerStore = await headers()
+  const origin = getRedirectOrigin(headerStore)
   throw redirect(
-    AUTH_URLS.SIGN_IN +
-      (returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : '')
+    `${origin}${AUTH_URLS.SIGN_IN}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`
   )
 }

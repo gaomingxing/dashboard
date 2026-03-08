@@ -47,3 +47,25 @@ export function isExternalOrigin(
     normalizeOrigin(new URL(next).origin) !== normalizeOrigin(dashboardOrigin)
   )
 }
+
+/**
+ * Gets the client-facing origin for redirects when behind a reverse proxy (e.g. VKE + ALB).
+ * 1. Prefers x-forwarded-proto + x-forwarded-host when set by the load balancer.
+ * 2. Falls back to NEXT_PUBLIC_APP_URL when set (for ALB/K8s where Host is internal).
+ */
+export function getRequestOrigin(request: Request): string {
+  const forwardedHost = request.headers.get('x-forwarded-host')
+  const forwardedProto = request.headers.get('x-forwarded-proto')
+  if (forwardedHost && forwardedProto) {
+    return `${forwardedProto}://${forwardedHost}`
+  }
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (appUrl) {
+    try {
+      return new URL(appUrl).origin
+    } catch {
+      // invalid URL, fall through to request.url
+    }
+  }
+  return new URL(request.url).origin
+}

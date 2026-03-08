@@ -1,7 +1,7 @@
 import 'server-cli-only'
 
-import { type NextRequest, NextResponse } from 'next/server'
 import { AUTH_URLS, PROTECTED_URLS } from '@/configs/urls'
+import { getRequestOrigin } from '@/lib/utils/auth'
 
 export function isAuthRoute(pathname: string): boolean {
   return (
@@ -15,21 +15,23 @@ export function isDashboardRoute(pathname: string): boolean {
   return pathname.startsWith(PROTECTED_URLS.DASHBOARD)
 }
 
-export function buildRedirectUrl(path: string, request: NextRequest): URL {
-  return new URL(path, request.url)
+export function buildRedirectUrl(path: string, request: Request): URL {
+  const origin = getRequestOrigin(request)
+  return new URL(path, origin)
 }
 
 export function getAuthRedirect(
-  request: NextRequest,
+  request: Request,
   isAuthenticated: boolean
-): NextResponse | null {
-  if (isDashboardRoute(request.nextUrl.pathname) && !isAuthenticated) {
-    return NextResponse.redirect(buildRedirectUrl(AUTH_URLS.SIGN_IN, request))
+): Response | null {
+  const pathname = new URL(request.url).pathname
+  if (isDashboardRoute(pathname) && !isAuthenticated) {
+    return Response.redirect(buildRedirectUrl(AUTH_URLS.SIGN_IN, request).toString())
   }
 
-  if (isAuthRoute(request.nextUrl.pathname) && isAuthenticated) {
-    return NextResponse.redirect(
-      buildRedirectUrl(PROTECTED_URLS.DASHBOARD, request)
+  if (isAuthRoute(pathname) && isAuthenticated) {
+    return Response.redirect(
+      buildRedirectUrl(PROTECTED_URLS.DASHBOARD, request).toString()
     )
   }
 
