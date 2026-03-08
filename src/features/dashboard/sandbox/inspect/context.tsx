@@ -190,6 +190,10 @@ export default function SandboxInspectProvider({
 
     const sandbox = await Sandbox.connect(sandboxInfo.sandboxID, {
       domain: process.env.NEXT_PUBLIC_E2B_DOMAIN,
+      // 使用 NEXT_PUBLIC_INFRA_API_URL 时不再加 api. 前缀（与 Infra API 实际部署一致）
+      ...(process.env.NEXT_PUBLIC_INFRA_API_URL && {
+        apiUrl: process.env.NEXT_PUBLIC_INFRA_API_URL,
+      }),
       // Keep inspect connections from extending sandbox TTL via SDK default connect timeout.
       timeoutMs: 1_000,
       headers: {
