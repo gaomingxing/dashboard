@@ -132,11 +132,16 @@ const BuildsTable = () => {
   )
 
   // Handlers
-  const buildsQueryKey = trpc.builds.list.infiniteQueryOptions({
-    teamIdOrSlug,
-    statuses,
-    buildIdOrTemplate,
-  }).queryKey
+  const buildsQueryKey = trpc.builds.list.infiniteQueryOptions(
+    {
+      teamIdOrSlug,
+      statuses,
+      buildIdOrTemplate,
+    },
+    {
+      getNextPageParam: (page) => page.nextCursor ?? undefined,
+    }
+  ).queryKey
 
   const handleLoadMore = useCallback(() => {
     fetchNextPage()

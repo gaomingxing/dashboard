@@ -4,6 +4,7 @@ import type {
   EChartsOption,
   MarkPointComponentOption,
   SeriesOption,
+  EChartsType,
 } from 'echarts'
 import { LineChart } from 'echarts/charts'
 import {
@@ -61,7 +62,7 @@ function TeamMetricsChart({
   onHoverEnd,
 }: TeamMetricsChartProps) {
   const chartRef = useRef<ReactEChartsCore | null>(null)
-  const chartInstanceRef = useRef<echarts.ECharts | null>(null)
+  const chartInstanceRef = useRef<EChartsType | null>(null)
   const { resolvedTheme } = useTheme()
 
   // use refs for callbacks to avoid re-creating chart options
@@ -147,7 +148,7 @@ function TeamMetricsChart({
   }, [])
 
   // chart ready handler - stable reference
-  const handleChartReady = useCallback((chart: echarts.ECharts) => {
+  const handleChartReady = useCallback((chart: EChartsType) => {
     chartInstanceRef.current = chart
 
     // Activate brush selection mode

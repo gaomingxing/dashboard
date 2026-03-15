@@ -20,5 +20,6 @@
   },
   "[json]": {
     "editor.defaultFormatter": "biomejs.biome"
-  }
+  },
+  "commentTranslate.source": "Bing"
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import type { EChartsOption, SeriesOption } from 'echarts'
+import type { EChartsOption, EChartsType, SeriesOption } from 'echarts'
 import { BarChart } from 'echarts/charts'
 import {
   BrushComponent,
@@ -36,7 +36,7 @@ function ComputeUsageChart({
   onBrushEnd,
 }: ComputeUsageChartProps) {
   const chartRef = useRef<ReactEChartsCore | null>(null)
-  const chartInstanceRef = useRef<echarts.ECharts | null>(null)
+  const chartInstanceRef = useRef<EChartsType | null>(null)
   const { resolvedTheme } = useTheme()
 
   const onHoverRef = useRef(onHover)
@@ -100,7 +100,7 @@ function ComputeUsageChart({
     }
   }, [])
 
-  const handleChartReady = useCallback((chart: echarts.ECharts) => {
+  const handleChartReady = useCallback((chart: EChartsType) => {
     chartInstanceRef.current = chart
 
     // activate brush selection mode
